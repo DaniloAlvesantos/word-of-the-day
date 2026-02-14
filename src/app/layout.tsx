@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lexend, Fraunces } from "next/font/google";
+import { Lexend, Playfair_Display } from "next/font/google";
 import { SITE_TITLE, SITE_DESCRIPTION } from "@/lib/constants/SEO";
 import "./globals.css";
 
@@ -8,8 +8,8 @@ const lexend = Lexend({
   subsets: ["latin"],
 });
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
 });
 
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lexend.variable} ${fraunces.variable} antialiased`}>
+      <body className={`${lexend.variable} ${playfair.variable} antialiased`}>
         {children}
       </body>
     </html>
