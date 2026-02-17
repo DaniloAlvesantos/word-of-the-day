@@ -1,8 +1,10 @@
 import { createOllama } from "ai-sdk-ollama";
 import { generateText, Output } from "ai";
 import { z } from "zod";
+import { adminDb } from "@/lib/firebase/admin";
+import { Timestamp } from "firebase-admin/firestore";
 
-const modelName = "llama3.2:latest";
+const modelName = process.env.NEXT_PUBLIC_AIMODEL ?? "llama3.2:latest";
 
 export async function GET(request: Request) {
   const sdk = createOllama();
@@ -44,11 +46,31 @@ export async function GET(request: Request) {
                DO NOT include <thing> tags.
                DO NOT include markdown headers or explanations.
                Focus on mindset and personal growth words.
+               Pronounce in IPA (International Phonetic Alphabet)
                The flashcards should cover: 1. Definition, 2. Synonym/Antonym, 3. Context usage.`,
       prompt: "Generate today's mindset word.",
     });
 
-    return Response.json(output);
+    if (!output) {
+      return Response.json({ error: "Output is empty." }, { status: 400 });
+    }
+
+    const wordRef = adminDb.collection("word");
+    const wordId = output.word.trim().toLocaleLowerCase();
+    const docRef = await wordRef.doc(wordId);
+
+    await docRef.set(
+      {
+        ...output,
+        timestamp: Timestamp.now(),
+      },
+      { merge: true },
+    );
+
+    return Response.json({
+      message: "Created word with success",
+      id: docRef.id,
+    });
   } catch (error) {
     console.error("AI Generation Error:", error);
     return Response.json({ error: "Failed to generate word" }, { status: 500 });
