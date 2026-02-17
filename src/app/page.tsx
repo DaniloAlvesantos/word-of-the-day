@@ -37,15 +37,16 @@ export default function Home() {
     <>
       <Header />
       <main className="flex flex-col items-center justify-center mt-10">
+        <h1 className="sr-only">Learn a new word today</h1>
         <p className="text-sm uppercase font-medium text-zinc-400 tracking-widest">
           Word of the day - <time>{today}</time>
         </p>
 
         <section id="word-wrapper" className="flex flex-col items-center gap-4">
           <div className="flex gap-4 items-center">
-            <h1 className="font-serif font-semibold text-8xl my-2">
+            <h2 className="font-serif font-semibold text-8xl my-2">
               {word.word}
-            </h1>
+            </h2>
             <button
               type="button"
               aria-label="Play pronunciation"

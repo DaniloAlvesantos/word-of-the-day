@@ -1,44 +1,56 @@
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateText } from "ai";
+import { createOllama } from "ai-sdk-ollama";
+import { generateText, Output } from "ai";
+import { z } from "zod";
 
-const modelName = "deepseek/deepseek-r1-0528:free";
+const modelName = "llama3.2:latest";
 
 export async function GET(request: Request) {
-  const openrouter = createOpenRouter({
-    apiKey: process.env.OPENROUTER_APIKEY,
-  });
+  const sdk = createOllama();
 
-  const today = new Date().toISOString().split("T")[0];
+  try {
+    const { output } = await generateText({
+      model: sdk(modelName),
+      output: Output.object({
+        schema: z.object({
+          word: z.string(),
+          type: z.enum([
+            "nouns",
+            "verbs",
+            "adjective",
+            "adverb",
+            "pronoun",
+            "preposition",
+            "conjunction",
+            "interjection",
+            "phrasal verb",
+          ]),
+          pronounce: z.string(),
+          definition: z.string(),
+          usage: z.string(),
+          synonyms: z.array(z.string()).max(4),
+          // flashcards: z
+          //   .array(
+          //     z.object({
+          //       front: z.string(),
+          //       back: z.string(),
+          //     }),
+          //   )
+          //   .length(3),
+        }),
+      }),
+      system: `You are a linguistic expert on English learners. 
+               Generate a powerful mindset word. 
+               Return ONLY a raw JSON object.
+               DO NOT include <thing> tags.
+               DO NOT include markdown headers or explanations.
+               Focus on mindset and personal growth words.
+               The flashcards should cover: 1. Definition, 2. Synonym/Antonym, 3. Context usage.`,
+      prompt: "Generate today's mindset word.",
+    });
 
-  const response = await generateText({
-    model: openrouter(modelName),
-    prompt: [
-      {
-        role: "system",
-        content: `You are a linguistic expert focusing on personal growth and mindset. 
-          Provide a Word of the Day in strict JSON format.
-          
-          Allowed 'type' values: "nouns", "verbs", "adjective", "adverb", "pronoun", "preposition", "conjunction", "interjection", "phrasal verb".
-          Constraints: Max 4 synonyms.
-          
-          JSON Structure:
-          {
-            "word": "string",
-            "type": "string",
-            "pronounce": "string",
-            "definition": "string",
-            "usage": "string",
-            "synonyms": ["string"]
-          }`,
-      },
-      {
-        role: "user",
-        content: "Generate a powerful mindset-related word for today.",
-      },
-    ],
-  });
-
-  return new Response(JSON.stringify({text: response.text}), {
-    status: 200,
-  });
+    return Response.json(output);
+  } catch (error) {
+    console.error("AI Generation Error:", error);
+    return Response.json({ error: "Failed to generate word" }, { status: 500 });
+  }
 }

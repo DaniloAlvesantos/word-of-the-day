@@ -1,9 +1,5 @@
 export interface QuizCollectionType {
-  sentence: string;
-  options: QuizOption[];
+  question: string;
+  options: string[];
+  answer: string;
 }
-
-type QuizOption = {
-  option: string;
-  isCorrect: boolean;
-};

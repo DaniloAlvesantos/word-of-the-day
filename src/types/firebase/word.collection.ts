@@ -7,7 +7,7 @@ export interface WordCollectionType {
   synonyms: string[];
 }
 
-type WordTypes =
+export type WordTypes =
   | "nouns"
   | "verbs"
   | "adjective"
