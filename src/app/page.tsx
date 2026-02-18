@@ -1,4 +1,5 @@
 "use client";
+import { getTodayWord } from "@/actions/word";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Highlight } from "@/components/highlight";
@@ -7,26 +8,26 @@ import { Button } from "@/components/ui/button";
 import { WordCollectionType } from "@/types/firebase/word.collection";
 import { Speech } from "@/util/speech";
 import { Bookmark, Share2, Volume2 } from "lucide-react";
-import { useState } from "react";
+import { use, useState } from "react";
 
 export default function Home() {
   const [speechTime, setSpeechTime] = useState<number>(1);
+  const word = use(getTodayWord());
 
-  const today = new Date().toLocaleDateString("en-US", {
-    month: "long",
-    day: "2-digit",
-  });
-
-  const word: WordCollectionType = {
-    word: "Ephemeral",
-    type: "adjective",
-    pronounce: "/əˈfem(ə)rəl/",
-    definition:
-      "Lasting for a very short time; fleeting or transitory in nature.",
-    usage:
-      "The beauty of the sunset was ephemeral, fading into the dark of night within minutes, leaving only a memory of its vibrant hues.",
-    synonyms: ["transient", "momentary", "brief"],
-  };
+  if (!word) {
+    // const wordFallback: WordCollectionType = {
+    //   word: "Ephemeral",
+    //   type: "adjective",
+    //   pronounce: "/əˈfem(ə)rəl/",
+    //   definition:
+    //     "Lasting for a very short time; fleeting or transitory in nature.",
+    //   usage:
+    //     "The beauty of the sunset was ephemeral, fading into the dark of night within minutes, leaving only a memory of its vibrant hues.",
+    //   synonyms: ["transient", "momentary", "brief"],
+    //   timestamp: "",
+    // };
+    return;
+  }
 
   const handleSpeech = () => {
     Speech(word.word, speechTime);
@@ -39,7 +40,13 @@ export default function Home() {
       <main className="flex flex-col items-center justify-center mt-10">
         <h1 className="sr-only">Learn a new word today</h1>
         <p className="text-sm uppercase font-medium text-zinc-400 tracking-widest">
-          Word of the day - <time>{today}</time>
+          Word of the day -
+          <time>
+            {word.createdAt.toDate().toLocaleDateString("en-US", {
+              month: "long",
+              day: "2-digit",
+            })}
+          </time>
         </p>
 
         <section id="word-wrapper" className="flex flex-col items-center gap-4">
@@ -82,15 +89,23 @@ export default function Home() {
                 Usage in context
               </h2>
               <blockquote className="text-lg text-zinc-500 italic">
-                &quot;<Highlight text={word.usage} wordToHighlight={word.word} />&quot;
+                &quot;
+                <Highlight text={word.usage} wordToHighlight={word.word} />
+                &quot;
               </blockquote>
             </div>
 
             <div className="flex items-center gap-4 w-full">
-              <Button variant="outline" className="flex-1 py-5 bg-white duration-300">
+              <Button
+                variant="outline"
+                className="flex-1 py-5 bg-white duration-300"
+              >
                 <Bookmark className="text-app-primary" /> Save to list
               </Button>
-              <Button variant="outline" className="flex-1 py-5 bg-white duration-300">
+              <Button
+                variant="outline"
+                className="flex-1 py-5 bg-white duration-300"
+              >
                 <Share2 className="text-app-primary" /> Share Word
               </Button>
             </div>
