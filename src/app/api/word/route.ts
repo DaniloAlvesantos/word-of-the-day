@@ -1,8 +1,9 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { WordCollectionType } from "@/types/firebase";
+import { getTodayId } from "@/util/date";
 
 export async function GET() {
-  const wordId = new Date().toISOString().split("T")[0];
+  const wordId = getTodayId();
   const wordRef = adminDb.collection("word");
   try {
     const todayData = await wordRef.doc(wordId).get();

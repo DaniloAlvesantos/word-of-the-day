@@ -1,10 +1,11 @@
 "use server";
 import { adminDb } from "@/lib/firebase/admin";
 import { WordCollectionType } from "@/types/firebase";
+import { getTodayId } from "@/util/date";
 
 export async function getTodayWord(): Promise<WordCollectionType | null> {
   const wordRef = adminDb.collection("word");
-  const wordId = new Date().toISOString().split("T")[0];
+  const wordId = getTodayId();
 
   try {
     const todayRef = await wordRef.doc(wordId).get();

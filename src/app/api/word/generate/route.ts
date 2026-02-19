@@ -3,6 +3,7 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
+import { getTodayId } from "@/util/date";
 
 const apiKey = process.env.NEXT_PRIVATE_GOOGLE_API_KEY;
 
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
     apiKey,
   });
 
-  const wordId = new Date().toISOString().split("T")[0];
+  const wordId = getTodayId();
   const wordRef = adminDb.collection("word").doc(wordId);
 
   try {
