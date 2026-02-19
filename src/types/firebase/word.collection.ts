@@ -11,6 +11,13 @@ export interface WordCollectionType {
   createdAt: Timestamp;
 }
 
+export interface WordCollectionTypeDateString extends Omit<
+  WordCollectionType,
+  "createdAt"
+> {
+  createdAt: string;
+}
+
 export type WordTypes =
   | "nouns"
   | "verbs"

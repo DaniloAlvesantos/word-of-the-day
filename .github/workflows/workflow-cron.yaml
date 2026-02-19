@@ -1,0 +1,14 @@
+name: Generate Word of the Day
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit Generate API Route
+        run: |
+          curl -X GET "https://lexical.vercel.app/api/word/generate"

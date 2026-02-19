@@ -8,6 +8,7 @@ export default defineConfig({
       framework: "next",
       bundler: "webpack",
     },
+    specPattern: "src/components/**/*.cy.{ts,tsx}",
   },
 
   e2e: {

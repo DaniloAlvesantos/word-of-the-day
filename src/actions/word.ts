@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import { adminDb } from "@/lib/firebase/admin";
 import { WordCollectionType } from "@/types/firebase";
 
@@ -13,13 +13,27 @@ export async function getTodayWord(): Promise<WordCollectionType | null> {
       return todayRef.data() as WordCollectionType;
     }
 
-    const latest = await wordRef
-    .orderBy("createdAt", "desc")
-    .limit(1)
-    .get();
+    const latest = await getLatestWord();
 
-    if(!latest.empty) {
-        return latest.docs[0].data() as WordCollectionType;
+    if (latest) {
+      return latest;
+    }
+
+    return null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+export async function getLatestWord(): Promise<WordCollectionType | null> {
+  const wordRef = adminDb.collection("word");
+
+  try {
+    const latest = await wordRef.orderBy("createdAt", "desc").limit(1).get();
+
+    if (!latest.empty) {
+      return latest.docs[0].data() as WordCollectionType;
     }
 
     return null;

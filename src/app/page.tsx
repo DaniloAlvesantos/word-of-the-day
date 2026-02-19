@@ -1,38 +1,29 @@
-"use client";
 import { getTodayWord } from "@/actions/word";
+import { PronounceButton } from "@/components/buttons/pronounceButton";
+import { SaveButton } from "@/components/buttons/saveButton";
+import { ShareButton } from "@/components/buttons/shareButton";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Highlight } from "@/components/highlight";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { WordCollectionType } from "@/types/firebase/word.collection";
-import { Speech } from "@/util/speech";
-import { Bookmark, Share2, Volume2 } from "lucide-react";
-import { use, useState } from "react";
+import { WordCollectionType } from "@/types/firebase";
+import { Timestamp } from "firebase-admin/firestore";
 
-export default function Home() {
-  const [speechTime, setSpeechTime] = useState<number>(1);
-  const word = use(getTodayWord());
-
-  if (!word) {
-    // const wordFallback: WordCollectionType = {
-    //   word: "Ephemeral",
-    //   type: "adjective",
-    //   pronounce: "/əˈfem(ə)rəl/",
-    //   definition:
-    //     "Lasting for a very short time; fleeting or transitory in nature.",
-    //   usage:
-    //     "The beauty of the sunset was ephemeral, fading into the dark of night within minutes, leaving only a memory of its vibrant hues.",
-    //   synonyms: ["transient", "momentary", "brief"],
-    //   timestamp: "",
-    // };
-    return;
-  }
-
-  const handleSpeech = () => {
-    Speech(word.word, speechTime);
-    setSpeechTime((prev) => prev + 1);
-  };
+export default async function Home() {
+  const word =
+    (await getTodayWord()) ??
+    ({
+      word: "Ephemeral",
+      type: "adjective",
+      pronounce: "/əˈfem(ə)rəl/",
+      definition:
+        "Lasting for a very short time; fleeting or transitory in nature.",
+      usage:
+        "The beauty of the sunset was ephemeral, fading into the dark of night within minutes, leaving only a memory of its vibrant hues.",
+      synonyms: ["transient", "momentary", "brief"],
+      createdAt: Timestamp.fromDate(new Date("2026-02-14T00:00:00Z")),
+      dayId: "2026-02-14",
+    } as WordCollectionType);
 
   return (
     <>
@@ -51,17 +42,10 @@ export default function Home() {
 
         <section id="word-wrapper" className="flex flex-col items-center gap-4">
           <div className="flex gap-4 items-center">
-            <h2 className="font-serif font-semibold text-8xl my-2">
+            <h2 className="font-serif font-semibold text-6xl sm:text-8xl my-2">
               {word.word}
             </h2>
-            <button
-              type="button"
-              aria-label="Play pronunciation"
-              className="bg-app-primary text-white p-2 shadow-md shadow-app-primary rounded-full hover:bg-app-primary/80 transition-colors duration-300"
-              onClick={handleSpeech}
-            >
-              <Volume2 className="size-6" />
-            </button>
+            <PronounceButton word={word.word} />
           </div>
 
           <div className="text-zinc-400">
@@ -73,7 +57,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-18 flex flex-col w-[60%]">
+        <section className="mt-18 flex flex-col w-[90%] sm:w-[60%]">
           <article className="bg-white shadow-md rounded-lg py-4 px-8 md:px-18 md:py-10 space-y-8">
             <div>
               <h2 className="uppercase tracking-wider text-sm text-app-primary font-medium my-2">
@@ -95,19 +79,9 @@ export default function Home() {
               </blockquote>
             </div>
 
-            <div className="flex items-center gap-4 w-full">
-              <Button
-                variant="outline"
-                className="flex-1 py-5 bg-white duration-300"
-              >
-                <Bookmark className="text-app-primary" /> Save to list
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 py-5 bg-white duration-300"
-              >
-                <Share2 className="text-app-primary" /> Share Word
-              </Button>
+            <div className="inline-flex items-center gap-4 w-full">
+              <SaveButton word={word.word} />
+              <ShareButton word={word.word} />
             </div>
           </article>
 
