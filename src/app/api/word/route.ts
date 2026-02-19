@@ -16,9 +16,18 @@ export async function GET() {
     const latest = await wordRef.orderBy("createdAt", "desc").limit(1).get();
 
     if (!latest.empty) {
-      return latest.docs[0].data() as WordCollectionType;
+      return Response.json(
+        {
+          data: latest.docs[0].data() as WordCollectionType,
+        },
+        { status: 200 },
+      );
     }
   } catch (err) {
     console.error(err);
+    return Response.json(
+      { error: "Failed to fetch word of the day" },
+      { status: 500 },
+    );
   }
 }
