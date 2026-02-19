@@ -29,6 +29,3 @@ jobs:
         with:
           component: true
           browser: chrome 
-
-      - name: Run Build
-        run: npm run build

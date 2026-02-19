@@ -1,13 +1,15 @@
-import { createOllama } from "ai-sdk-ollama";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 
-const modelName = process.env.NEXT_PUBLIC_AIMODEL ?? "llama3.2:latest";
+const apiKey = process.env.NEXT_PRIVATE_GOOGLE_API_KEY;
 
 export async function GET(request: Request) {
-  const sdk = createOllama();
+  const sdk = createGoogleGenerativeAI({
+    apiKey,
+  });
 
   const wordId = new Date().toISOString().split("T")[0];
   const wordRef = adminDb.collection("word").doc(wordId);
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     }
 
     const { output } = await generateText({
-      model: sdk(modelName),
+      model: sdk("gemini-2.5-flash"),
       output: Output.object({
         schema: z.object({
           word: z.string(),
