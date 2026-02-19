@@ -1,6 +1,6 @@
 import { PronounceButton } from "./index";
 
-const isCI = Cypress.expose("IS_CI") === true || Cypress.expose("IS_CI") === "true";
+const isCI = process.env.NEXT_PUBLIC_IS_CI === "true";
 
 describe("Speech Synthesis Testing", () => {
   const testFunc = isCI ? it.skip : it;

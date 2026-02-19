@@ -24,10 +24,11 @@ jobs:
 
       - name: Run Component Tests
         uses: cypress-io/github-action@v6
+        env: 
+          NEXT_PUBLIC_IS_CI:"true"
         with:
           component: true
           browser: chrome 
-          env: IS_CI=true
 
       - name: Run Build
         run: npm run build
