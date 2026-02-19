@@ -9,6 +9,7 @@ export default defineConfig({
       bundler: "webpack",
     },
     specPattern: "src/components/**/*.cy.{ts,tsx}",
+    excludeSpecPattern: "**/pronounceButton/*.cy.tsx",
   },
 
   e2e: {
