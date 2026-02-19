@@ -27,6 +27,7 @@ jobs:
         with:
           component: true
           browser: chrome 
+          env: IS_CI=true
 
       - name: Run Build
         run: npm run build
