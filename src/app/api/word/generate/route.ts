@@ -26,6 +26,7 @@ export async function GET(request: Request) {
 
     const { output } = await generateText({
       model: sdk("gemini-2.5-flash"),
+      temperature: 0.8,
       output: Output.object({
         schema: z.object({
           word: z.string(),
@@ -40,18 +41,19 @@ export async function GET(request: Request) {
             "interjection",
             "phrasal verb",
           ]),
-          pronounce: z.string(),
+          pronounce: z
+            .string()
+            .describe("Pronounce in IPA (International Phonetic Alphabet)"),
           definition: z.string(),
           usage: z.string(),
-          synonyms: z.array(z.string()).max(4),
+          synonyms: z.array(z.string()),
         }),
       }),
       system: `You are a linguistic expert on English learners. 
                Generate a powerful mindset word. 
-               Return ONLY a raw JSON object.
-               Focus on mindset and personal growth words.
-               Pronounce in IPA (International Phonetic Alphabet).`,
-      prompt: "Generate today's mindset word.",
+               Focus on mindset, productivity, and personal growth.
+               CRITICAL RULE: You must provide a maximum of 4 synonyms.`,
+      prompt: `Today is ${new Date().toLocaleDateString("en-US")}. Generate a unique, uncommon mindset word that is highly useful for English learners to master English. Do not use basic words like 'Resilience' or 'Grit'.`,
     });
 
     if (!output) throw new Error("AI returned empty output");
