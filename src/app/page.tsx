@@ -10,7 +10,7 @@ import { WordCollectionType } from "@/types/firebase";
 import { Timestamp } from "firebase-admin/firestore";
 
 export default async function Home() {
-  const { word, serverDate } =
+  const word =
     (await getTodayWord()) ??
     ({
       word: "Ephemeral",
@@ -24,10 +24,6 @@ export default async function Home() {
       createdAt: Timestamp.fromDate(new Date("2026-02-14T00:00:00Z")),
       dayId: "2026-02-14",
     } as WordCollectionType);
-
-  console.log(serverDate);
-
-  if (!word) return;
 
   return (
     <>
