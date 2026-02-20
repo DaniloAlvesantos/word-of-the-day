@@ -1,4 +1,6 @@
 export interface FlashcardCollectionType {
-  front: string;
-  back: string;
+  data: {
+    question: string;
+    answer: string;
+  }[];
 }
