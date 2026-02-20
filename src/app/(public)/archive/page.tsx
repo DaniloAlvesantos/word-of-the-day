@@ -1,4 +1,5 @@
 "use client";
+
 import {
   ArchiveCard,
   ArchiveCardSkeleton,
@@ -10,8 +11,8 @@ import { useArchives } from "@/hooks/useArchives";
 export default function ArchivePage() {
   const { data, isLoading, isSuccess } = useArchives(6);
 
-  if (!data || !isSuccess) {
-    return;
+  if (!isSuccess && !isLoading) {
+    return null;
   }
 
   return (
@@ -25,14 +26,18 @@ export default function ArchivePage() {
         <hr className="mt-6" />
       </section>
 
-      <main className="p-4 min-h-[calc(80dvh-200px)] sm:min-h-auto">
+      <main className="p-4 min-h-[calc(80dvh-200px)] sm:min-h-auto columns-1 sm:columns-2 md:columns-3 gap-4 space-y-6">
         {isLoading
           ? Array.from({ length: 6 }).map((_, index) => (
-              <ArchiveCardSkeleton key={index} />
+              <div key={index} className="break-inside-avoid">
+                <ArchiveCardSkeleton />
+              </div>
             ))
-          : data.map((archive) => {
-              return <ArchiveCard {...archive} key={crypto.randomUUID()} />;
-            })}
+          : data?.map((archive) => (
+              <div key={archive.createdAt} className="break-inside-avoid">
+                <ArchiveCard {...archive} />
+              </div>
+            ))}
       </main>
       <Footer />
     </>

@@ -3,7 +3,12 @@ import { adminDb } from "@/lib/firebase/admin";
 import { WordCollectionType } from "@/types/firebase";
 import { getTodayId } from "@/util/date";
 
-export async function getTodayWord(): Promise<WordCollectionType | null> {
+interface GetTodayWordResponse {
+  word: WordCollectionType | null;
+  serverDate: Date;
+}
+
+export async function getTodayWord(): Promise<GetTodayWordResponse> {
   const wordRef = adminDb.collection("word");
   const wordId = getTodayId();
 
@@ -11,19 +16,25 @@ export async function getTodayWord(): Promise<WordCollectionType | null> {
     const todayRef = await wordRef.doc(wordId).get();
 
     if (todayRef.exists) {
-      return todayRef.data() as WordCollectionType;
+      return {
+        word: todayRef.data() as WordCollectionType,
+        serverDate: new Date(),
+      };
     }
 
     const latest = await getLatestWord();
 
     if (latest) {
-      return latest;
+      return {
+        word: latest,
+        serverDate: new Date(),
+      };
     }
 
-    return null;
+    return { word: null, serverDate: new Date() } as GetTodayWordResponse;
   } catch (err) {
     console.error(err);
-    return null;
+    return { word: null, serverDate: new Date() } as GetTodayWordResponse;
   }
 }
 

@@ -1,7 +1,7 @@
 import { WordCollectionTypeDateString } from "@/types/firebase";
 import { useQuery } from "@tanstack/react-query";
 
-const fetchArchives = async (limit: number, lastVisible?: string) => {
+const fetchArchives = async (limit: number, lastVisible?: string): Promise<WordCollectionTypeDateString[]> => {
   try {
     const queryParams = new URLSearchParams({ limit: limit.toString() });
     if (lastVisible) {

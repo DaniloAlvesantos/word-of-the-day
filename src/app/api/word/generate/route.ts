@@ -25,6 +25,16 @@ export async function GET(request: Request) {
       });
     }
 
+    const recentWordsSnapshot = await adminDb
+      .collection("word")
+      .orderBy("createdAt", "desc")
+      .limit(10)
+      .get();
+
+    const usedWords = recentWordsSnapshot.docs
+      .map((doc) => doc.data().word)
+      .join(", ");
+
     const { output } = await generateText({
       model: sdk("gemini-2.5-flash"),
       temperature: 0.8,
@@ -51,10 +61,15 @@ export async function GET(request: Request) {
         }),
       }),
       system: `You are a linguistic expert on English learners. 
-               Generate a powerful mindset word. 
-               Focus on mindset, productivity, and personal growth.
-               CRITICAL RULE: You must provide a maximum of 4 synonyms.`,
-      prompt: `Today is ${new Date().toLocaleDateString("en-US")}. Generate a unique, uncommon mindset word that is highly useful for English learners to master English. Do not use basic words like 'Resilience' or 'Grit'.`,
+               Generate a real English word that exists in standard dictionaries.
+               It must be uncommon but legitimate.
+               Do not invent words.
+               Focus on mindset, productivity, or personal growth.
+               The word must be useful for advanced English learners.
+               Avoid trendy social media buzzwords.
+               CRITICAL RULE 1: You must provide a maximum of 4 synonyms.
+               CRITICAL RULE 2: DO NOT generate any of the following previously used words: [${usedWords}].`,
+      prompt: `Today is ${wordId}. Generate a unique, uncommon mindset word that is highly useful for English learners to master English. Do not use basic words like 'Resilience' or 'Grit'.`,
     });
 
     if (!output) throw new Error("AI returned empty output");
