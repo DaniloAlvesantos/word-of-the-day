@@ -11,7 +11,7 @@ interface WordContentProps {
 
 export const WordContent = ({ word }: WordContentProps) => {
   return (
-    <main className="flex flex-col items-center justify-center mt-10">
+    <main className="flex flex-col items-center justify-center mt-10" id="content">
       <h1 className="sr-only">Learn a new word today</h1>
       <p className="text-sm uppercase font-medium text-zinc-400 tracking-widest">
         Word of the day -
@@ -72,7 +72,7 @@ export const WordContent = ({ word }: WordContentProps) => {
           <h3 className="uppercase font-semibold text-zinc-400 text-sm mb-2">
             Synonyms
           </h3>
-          <ul className="flex gap-2">
+          <ul className="flex flex-wrap gap-2">
             {word.synonyms.map((d) => (
               <li key={crypto.randomUUID()}>
                 <Badge variant="outline" className="bg-white">

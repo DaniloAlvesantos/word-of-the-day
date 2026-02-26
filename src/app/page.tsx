@@ -5,6 +5,8 @@ import { WordContent } from "@/components/word/wordContent";
 import { WordCollectionType } from "@/types/firebase";
 import { Timestamp } from "firebase-admin/firestore";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const word =
     (await getTodayWord()) ??

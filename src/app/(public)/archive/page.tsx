@@ -15,6 +15,10 @@ export default function ArchivePage() {
     return null;
   }
 
+  const sortedData = [...data ?? []]?.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
   return (
     <>
       <Header />
@@ -26,14 +30,14 @@ export default function ArchivePage() {
         <hr className="mt-6" />
       </section>
 
-      <main className="p-4 min-h-[calc(80dvh-200px)] sm:min-h-auto columns-1 sm:columns-2 md:columns-3 gap-4 space-y-6">
+      <main className="p-4 columns-1 sm:columns-2 md:columns-3 gap-4 space-y-6">
         {isLoading
           ? Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="break-inside-avoid">
                 <ArchiveCardSkeleton />
               </div>
             ))
-          : data?.map((archive) => (
+          : sortedData.map((archive) => (
               <div key={archive.createdAt} className="break-inside-avoid">
                 <ArchiveCard {...archive} />
               </div>

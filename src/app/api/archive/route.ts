@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
       return {
         ...item,
-        createdAt: item.createdAt.toDate(),
+        createdAt: item.createdAt.toDate().toISOString(),
       };
     });
 

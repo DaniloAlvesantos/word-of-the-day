@@ -69,39 +69,41 @@ export async function getWordById(
 
 export type GetArchiveResponse = {
   word: WordCollectionType;
-  quiz: QuizCollectionType;
-  flashcard: FlashcardCollectionType;
+  quiz: QuizCollectionType | null;
+  flashcard: FlashcardCollectionType | null;
 };
 
 export async function getWholeArchive(
   id?: string,
 ): Promise<GetArchiveResponse> {
-  const wordId = id || getTodayId();
-  const wordRef = adminDb.collection("word");
-  const quizRef = adminDb.collection("quiz");
-  const flashcardRef = adminDb.collection("flashcard");
-
+  const wordId = id || getTodayId(); 
+  
   try {
-    const wordsSnapshot = await wordRef.doc(wordId).get();
+    const wordDoc = await adminDb.collection("word").doc(wordId).get();
 
-    if (!wordsSnapshot.exists) {
-      throw new Error("Word not found");
+    if (!wordDoc.exists) {
+      throw new Error("Word entry not found for this date");
     }
 
-    const word = wordsSnapshot.data() as WordCollectionType;
+    const wordData = wordDoc.data() as WordCollectionType;
+    const normalizedWord = wordData.word.toLowerCase().trim();
 
-    const quizSnapshot = await quizRef.doc(word.word.toLowerCase()).get();
-    const flashcardSnapshot = await flashcardRef
-      .doc(word.word.toLowerCase())
-      .get();
+    const quizId = `${normalizedWord}_vocabulary`;
+    const flashcardId = `${normalizedWord}_default`;
 
-    const quizData = (quizSnapshot.data() as QuizCollectionType) ?? [];
-    const flashcardData =
-      (flashcardSnapshot.data() as FlashcardCollectionType) ?? [];
+    const [quizSnap, flashcardSnap] = await Promise.all([
+      adminDb.collection("quiz").doc(quizId).get(),
+      adminDb.collection("flashcard").doc(flashcardId).get()
+    ]);
 
-    return { word, quiz: quizData, flashcard: flashcardData };
+    return {
+      word: wordData,
+      quiz: quizSnap.exists ? (quizSnap.data() as QuizCollectionType) : null,
+      flashcard: flashcardSnap.exists ? (flashcardSnap.data() as FlashcardCollectionType) : null,
+    };
+
   } catch (err) {
-    console.error(err);
+    console.error("Error in getWholeArchive:", err);
     throw err;
   }
 }
