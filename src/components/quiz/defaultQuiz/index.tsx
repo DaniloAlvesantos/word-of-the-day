@@ -122,6 +122,7 @@ export function CardQuiz(props: CardQuizProps) {
       <CardFooter className="flex-col gap-4">
         {selected && (
           <div
+            id="quizExplanation"
             className={`w-full p-4 rounded-lg border text-sm animate-in fade-in slide-in-from-top-2 duration-500 ${
               isCorrect
                 ? "bg-green-50/50 border-green-100 text-green-800"

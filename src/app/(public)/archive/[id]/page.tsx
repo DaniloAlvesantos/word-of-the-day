@@ -15,10 +15,12 @@ export default async function WordPAge({
 
   if (!word) redirect("/notFound");
 
-  const serializedQuiz = quiz ? {
-    ...quiz,
-    updatedAt: quiz.updatedAt.toDate().toISOString(),
-  } : null;
+  const serializedQuiz = quiz
+    ? {
+        ...quiz,
+        updatedAt: quiz.updatedAt.toDate().toISOString(),
+      }
+    : null;
 
   return (
     <>

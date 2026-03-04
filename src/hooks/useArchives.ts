@@ -1,29 +1,31 @@
 import { WordCollectionTypeDateString } from "@/types/firebase";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
-const fetchArchives = async (limit: number, lastVisible?: string): Promise<WordCollectionTypeDateString[]> => {
-  try {
-    const queryParams = new URLSearchParams({ limit: limit.toString() });
-    if (lastVisible) {
-      queryParams.append("lastVisible", lastVisible);
-    }
-    const response = await fetch(`/api/archive?${queryParams.toString()}`);
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch archives");
-    }
-
-    return (await response.json()) as WordCollectionTypeDateString[];
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
+type Response = {
+  data: WordCollectionTypeDateString[];
+  nextCursor: string | null;
 };
 
-export const useArchives = (limit: number, lastVisible?: string) => {
-  const query = useQuery({
-    queryKey: ["archives", limit, lastVisible],
-    queryFn: () => fetchArchives(limit, lastVisible),
+const fetchArchives = async ({
+  pageParam,
+}: {
+  pageParam: string | null;
+}): Promise<Response> => {
+  const queryParams = new URLSearchParams({ limit: "7" });
+  if (pageParam) queryParams.append("lastVisible", pageParam);
+
+  const response = await fetch(`/api/archive?${queryParams.toString()}`);
+  if (!response.ok) throw new Error("Failed to fetch");
+
+  return response.json();
+};
+
+export const useArchives = () => {
+  const query = useInfiniteQuery({
+    queryKey: ["archives"],
+    queryFn: fetchArchives,
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

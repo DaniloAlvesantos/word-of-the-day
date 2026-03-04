@@ -6,18 +6,20 @@ import {
 } from "@/components/cards/archiveCard";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { Button } from "@/components/ui/button";
 import { useArchives } from "@/hooks/useArchives";
 
 export default function ArchivePage() {
-  const { data, isLoading, isSuccess } = useArchives(6);
+  const { data, isLoading, fetchNextPage, isFetchingNextPage, hasNextPage } =
+    useArchives();
 
-  if (!isSuccess && !isLoading) {
-    return null;
-  }
-
-  const sortedData = [...data ?? []]?.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
+  const sortedData =
+    data?.pages
+      .flatMap((p) => p.data)
+      ?.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ) ?? [];
 
   return (
     <>
@@ -30,18 +32,35 @@ export default function ArchivePage() {
         <hr className="mt-6" />
       </section>
 
-      <main className="p-4 columns-1 sm:columns-2 md:columns-3 gap-4 space-y-6">
-        {isLoading
-          ? Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="break-inside-avoid">
-                <ArchiveCardSkeleton />
-              </div>
-            ))
-          : sortedData.map((archive) => (
-              <div key={archive.createdAt} className="break-inside-avoid">
-                <ArchiveCard {...archive} />
-              </div>
-            ))}
+      <main>
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 space-y-6">
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="break-inside-avoid">
+                  <ArchiveCardSkeleton />
+                </div>
+              ))
+            : sortedData.map((archive) => (
+                <div key={archive.dayId} className="break-inside-avoid">
+                  <ArchiveCard {...archive} />
+                </div>
+              ))}
+        </div>
+        <div
+          className="w-full flex items-center justify-center mt-10"
+          id="next"
+        >
+          {hasNextPage ? (
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              variant="outline"
+              className="bg-white w-full sm:w-xs"
+            >
+              {isFetchingNextPage ? "Loading more..." : "Load More"}
+            </Button>
+          ) : null}
+        </div>
       </main>
       <Footer />
     </>
