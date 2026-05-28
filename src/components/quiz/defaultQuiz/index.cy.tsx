@@ -14,9 +14,9 @@ describe("Quiz Testing", () => {
     cy.mount(<DefaultQuiz quizData={mockQuizData} />);
 
     cy.get(selectors.cardTitle).should("contain", "Quick Quiz");
-    cy.contains(mockQuizData.data[0].question).should("be.visible");
+    cy.contains(mockQuizData.questions[0].text).should("be.visible");
 
-    mockQuizData.data[0].options.forEach((question) => {
+    mockQuizData.questions[0].options.forEach((question) => {
       cy.contains(question).should("be.visible");
     });
 
@@ -24,7 +24,7 @@ describe("Quiz Testing", () => {
   });
 
   it("Should handle a correct answer", () => {
-    const firstQuiz = mockQuizData.data[0];
+    const firstQuiz = mockQuizData.questions[0];
     cy.mount(<DefaultQuiz quizData={mockQuizData} />);
 
     cy.contains(firstQuiz.answer).click();
@@ -34,7 +34,7 @@ describe("Quiz Testing", () => {
   });
 
   it("Should handle a incorrect answer", () => {
-    const firstQuiz = mockQuizData.data[0];
+    const firstQuiz = mockQuizData.questions[0];
     const wrongAnswer = firstQuiz.options.find(
       (option) => option !== firstQuiz.answer,
     );
@@ -49,15 +49,15 @@ describe("Quiz Testing", () => {
   it("Should transition the entrie quiz to the finish state", () => {
     cy.mount(<DefaultQuiz quizData={mockQuizData} />);
 
-    for (let i = 0; i < mockQuizData.data.length - 1; i++) {
+    for (let i = 0; i < mockQuizData.questions.length - 1; i++) {
       cy.contains(`Question ${i + 1} of`).should("be.visible");
-      cy.contains(mockQuizData.data[i].answer).click();
+      cy.contains(mockQuizData.questions[i].answer).click();
       cy.get(selectors.nextBtn).click();
     }
 
-    const lastIndex = mockQuizData.data.length - 1;
+    const lastIndex = mockQuizData.questions.length - 1;
     cy.contains(`Question ${lastIndex + 1} of`).should("be.visible");
-    cy.contains(mockQuizData.data[lastIndex].answer).click();
+    cy.contains(mockQuizData.questions[lastIndex].answer).click();
 
     cy.get(selectors.finishBtn).should("be.visible").and("not.be.enabled"); // change to: not.be.disabled
   });

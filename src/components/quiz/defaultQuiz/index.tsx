@@ -15,7 +15,13 @@ import { useState } from "react";
 
 interface DefaultQuizProps {
   quizData: Database["public"]["Tables"]["quiz"]["Row"] & {
-    questions: Database["public"]["Tables"]["question"]["Row"][];
+    questions: {
+      id: string;
+      text: string;
+      options: string[];
+      answer: string;
+      explanation: string;
+    }[];
   };
 }
 
@@ -39,8 +45,7 @@ export function DefaultQuiz({ quizData }: DefaultQuizProps) {
   );
 }
 
-type QuizItem = Database["public"]["Tables"]["question"]["Row"];
-
+type QuizItem = DefaultQuizProps["quizData"]["questions"][number];
 interface CardQuizProps {
   quizItem: QuizItem;
   currentStep: number;

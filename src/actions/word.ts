@@ -60,15 +60,11 @@ export async function getWordById(
 
 export type GetArchiveResponse = {
   word: Database["public"]["Tables"]["word"]["Row"];
-  quiz: (Database["public"]["Tables"]["quiz"]["Row"] & {
-    questions: {
-      id: string;
-      text: string;
-      options: string[];
-      answer: string;
-      explanation: string;
-    }[];
-  }) | null;
+  quiz:
+    | (Database["public"]["Tables"]["quiz"]["Row"] & {
+        questions: Database["public"]["Tables"]["question"]["Row"][];
+      })
+    | null;
   flashcard: Database["public"]["Tables"]["flashcard"]["Row"] | null;
 };
 
@@ -103,18 +99,19 @@ export async function getWholeArchive(
         .from("quiz")
         .select(
           `
-          *,
-          quiz_question (
-            position,
-            question (
-              id,
-              text,
-              options,
-              answer,
-              explanation
+            *,
+            quiz_question (
+              position,
+              question (
+                id,
+                text,
+                options,
+                answer,
+                explanation,
+                createdAt
+              )
             )
-          )
-        `,
+          `,
         )
         .eq("id", quizId)
         .maybeSingle(),
