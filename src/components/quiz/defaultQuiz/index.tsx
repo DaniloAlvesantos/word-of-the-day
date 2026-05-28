@@ -9,22 +9,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { QuizDocumentType } from "@/types/firebase";
+import { Database } from "@/types/database";
 import { Brain, CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 
 interface DefaultQuizProps {
-  quizData: QuizDocumentType;
+  quizData: Database["public"]["Tables"]["quiz"]["Row"] & {
+    questions: Database["public"]["Tables"]["question"]["Row"][];
+  };
 }
 
 export function DefaultQuiz({ quizData }: DefaultQuizProps) {
   const [current, setCurrent] = useState(0);
-  const currentQuestion = quizData.data[current];
-  const totalSteps = quizData.data.length - 1;
+  const currentQuestion = quizData.questions[current];
+
+  const totalSteps = quizData.questions.length;
 
   const handleNext = () => {
     setCurrent((prev) => prev + 1);
-    console.log(current);
   };
 
   return (
@@ -37,7 +39,7 @@ export function DefaultQuiz({ quizData }: DefaultQuizProps) {
   );
 }
 
-type QuizItem = QuizDocumentType["data"][number];
+type QuizItem = Database["public"]["Tables"]["question"]["Row"];
 
 interface CardQuizProps {
   quizItem: QuizItem;
@@ -48,7 +50,7 @@ interface CardQuizProps {
 
 export function CardQuiz(props: CardQuizProps) {
   const {
-    quizItem: { question, options, answer, explanation },
+    quizItem: { text, options, answer, explanation },
     currentStep,
     totalSteps,
     onNext,
@@ -56,8 +58,9 @@ export function CardQuiz(props: CardQuizProps) {
 
   const [selected, setSelected] = useState<string | null>(null);
 
-  const currentProgress = ((currentStep + 1) / (totalSteps + 1)) * 100;
+  const currentProgress = ((currentStep + 1) / totalSteps) * 100;
   const isCorrect = selected === answer;
+  const isLastQuestion = currentStep + 1 === totalSteps;
 
   const handleNextClick = () => {
     setSelected(null);
@@ -72,11 +75,11 @@ export function CardQuiz(props: CardQuizProps) {
             <Brain className="size-5" /> Quick Quiz
           </CardTitle>
           <span className="text-xs font-medium text-zinc-400">
-            Question {currentStep + 1} of {totalSteps + 1}
+            Question {currentStep + 1} of {totalSteps}
           </span>
         </div>
         <CardDescription className="text-zinc-800 font-medium text-lg">
-          {question}
+          {text}
         </CardDescription>
       </CardHeader>
 
@@ -144,12 +147,10 @@ export function CardQuiz(props: CardQuizProps) {
         <div className="flex justify-end w-full">
           <Button
             onClick={handleNextClick}
-            disabled={!selected || currentStep === totalSteps}
-            className={`px-8 ${currentStep === totalSteps ? "bg-zinc-900" : "bg-app-primary hover:bg-app-primary/80"}`}
+            disabled={!selected}
+            className={`px-8 ${isLastQuestion ? "bg-zinc-900" : "bg-app-primary hover:bg-app-primary/80"}`}
           >
-            {currentStep === totalSteps
-              ? "Finish Experience"
-              : "Next Challenge"}
+            {isLastQuestion ? "Finish Experience" : "Next Challenge"}
           </Button>
         </div>
       </CardFooter>

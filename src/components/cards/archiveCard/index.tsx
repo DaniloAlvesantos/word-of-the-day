@@ -7,11 +7,11 @@ interface ArchiveCardProps {
   type: string;
   definition: string;
   createdAt: string;
-  dayId: string;
+  id: string;
 }
 
 export const ArchiveCard = (props: ArchiveCardProps) => {
-  const { word, type, definition, createdAt, dayId } = props;
+  const { word, type, definition, createdAt, id } = props;
   const [savedWords, setSavedWords] = useLocalStorage<string[]>(
     "savedWords",
     [],
@@ -57,7 +57,7 @@ export const ArchiveCard = (props: ArchiveCardProps) => {
       <hr />
 
       <Link
-        href={`/archive/${dayId}`}
+        href={`/archive/${id}`}
         className="inline-flex items-center justify-between w-full hover:bg-zinc-100 transition-colors duration-300 px-4 py-2 rounded-md"
       >
         <p className="text-sm text-zinc-500">Read more</p>

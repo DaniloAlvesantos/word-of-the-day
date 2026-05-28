@@ -1,39 +1,51 @@
-import { adminDb } from "@/lib/firebase/admin";
-import { WordCollectionType } from "@/types/firebase/word.collection";
+import { createClient } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+
   const { searchParams } = new URL(request.url);
   const limit = Number(searchParams.get("limit")) || 7;
   const lastVisibleId = searchParams.get("lastVisible");
 
-  const wordRef = adminDb.collection("word");
-
   try {
-    let query = wordRef.orderBy("createdAt", "desc").limit(limit);
+    let query = supabase
+      .from("word")
+      .select("*")
+      .order("createdAt", { ascending: false })
+      .limit(limit);
 
     if (lastVisibleId) {
-      const lastDocInCache = await wordRef.doc(lastVisibleId).get();
-      if (lastDocInCache.exists) {
-        query = query.startAfter(lastDocInCache);
+      const { data: anchor, error: anchorError } = await supabase
+        .from("word")
+        .select("id")
+        .eq("id", lastVisibleId)
+        .single();
+
+      if (anchorError) {
+        throw new Error(anchorError.message);
+      }
+
+      if (anchor) {
+        query = query.lt("id", anchor.id);
       }
     }
 
-    const snapshot = await query.get();
+    const { data: words, error } = await query;
 
-    const data = snapshot.docs.map((doc) => {
-      const item = doc.data() as WordCollectionType;
-      return {
-        ...item,
-        id: doc.id,
-        createdAt: item.createdAt.toDate().toISOString(),
-      };
+    if (error) throw new Error(error.message);
+
+    if (!words || words.length === 0) {
+      return NextResponse.json({ data: [], nextCursor: null });
+    }
+
+    const lastItem = words[words.length - 1];
+    const nextCursor = lastItem ? lastItem.id : null;
+
+    return NextResponse.json({
+      data: words,
+      nextCursor,
     });
-
-    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-    const nextCursor = lastDoc ? lastDoc.id : null;
-      
-    return NextResponse.json({ data, nextCursor });
   } catch (err) {
     console.error("Fetch error:", err);
     return NextResponse.json({ data: [], nextCursor: null }, { status: 500 });

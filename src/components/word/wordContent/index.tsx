@@ -3,20 +3,23 @@ import { SaveButton } from "@/components/buttons/saveButton";
 import { ShareButton } from "@/components/buttons/shareButton";
 import { Highlight } from "@/components/highlight";
 import { Badge } from "@/components/ui/badge";
-import { WordCollectionType } from "@/types/firebase";
+import { Database } from "@/types/database";
 
 interface WordContentProps {
-  word: WordCollectionType;
+  word: Database["public"]["Tables"]["word"]["Row"];
 }
 
 export const WordContent = ({ word }: WordContentProps) => {
   return (
-    <main className="flex flex-col items-center justify-center mt-10" id="content">
+    <main
+      className="flex flex-col items-center justify-center mt-10"
+      id="content"
+    >
       <h1 className="sr-only">Learn a new word today</h1>
       <p className="text-sm uppercase font-medium text-zinc-400 tracking-widest">
         Word of the day -
         <time>
-          {word.createdAt.toDate().toLocaleDateString("en-US", {
+          {new Date(word.createdAt).toLocaleDateString("en-US", {
             month: "long",
             day: "2-digit",
           })}

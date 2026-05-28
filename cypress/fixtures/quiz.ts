@@ -1,6 +1,4 @@
-import { QuizDocumentType } from "@/types/firebase";
-
-export const mockQuizData: QuizDocumentType = {
+export const mockQuizData = {
   data: [
     {
       question:
@@ -77,4 +75,4 @@ export const mockQuizData: QuizDocumentType = {
   statement: "Assiduity",
   slug: "assiduity",
   updatedAt: "2026-02-20T00:00:00.000Z",
-};
+} as const;

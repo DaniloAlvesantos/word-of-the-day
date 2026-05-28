@@ -1,44 +1,26 @@
 "use server";
-import { adminDb } from "@/lib/firebase/admin";
-import {
-  FlashcardCollectionType,
-  QuizCollectionType,
-  WordCollectionType,
-} from "@/types/firebase";
-import { getTodayId } from "@/util/date";
+import { createClient } from "@/lib/supabase";
+import { Database } from "@/types/database";
 
-export async function getTodayWord(): Promise<WordCollectionType | null> {
-  const wordRef = adminDb.collection("word");
-  const wordId = getTodayId();
-
-  try {
-    const todayRef = await wordRef.doc(wordId).get();
-
-    if (todayRef.exists) {
-      return todayRef.data() as WordCollectionType;
-    }
-
-    const latest = await getLatestWord();
-
-    if (latest) {
-      return latest;
-    }
-
-    return null;
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
-}
-
-export async function getLatestWord(): Promise<WordCollectionType | null> {
-  const wordRef = adminDb.collection("word");
+export async function getTodayWord(): Promise<
+  Database["public"]["Tables"]["word"]["Row"] | null
+> {
+  const supabase = await createClient();
+  const query = supabase
+    .from("word")
+    .select("*")
+    .order("createdAt", { ascending: false })
+    .limit(1);
 
   try {
-    const latest = await wordRef.orderBy("createdAt", "desc").limit(1).get();
+    const { data: todayRef, error } = await query.single();
 
-    if (!latest.empty) {
-      return latest.docs[0].data() as WordCollectionType;
+    if (error) {
+      throw new Error(`Error fetching today's word: ${error.message}`);
+    }
+
+    if (todayRef) {
+      return todayRef;
     }
 
     return null;
@@ -50,14 +32,23 @@ export async function getLatestWord(): Promise<WordCollectionType | null> {
 
 export async function getWordById(
   id: string,
-): Promise<WordCollectionType | null> {
-  const wordRef = adminDb.collection("word");
+): Promise<Database["public"]["Tables"]["word"]["Row"] | null> {
+  const supabase = await createClient();
+  const wordRef = supabase
+    .from("word")
+    .select("*")
+    .eq("id", id)
+    .order("createdAt", { ascending: false });
 
   try {
-    const word = await wordRef.doc(id).get();
+    const { data: word, error } = await wordRef.single();
 
-    if (word.exists) {
-      return word.data() as WordCollectionType;
+    if (error) {
+      throw new Error(`Error fetching word: ${error.message}`);
+    }
+
+    if (word) {
+      return word;
     }
 
     return null;
@@ -68,40 +59,93 @@ export async function getWordById(
 }
 
 export type GetArchiveResponse = {
-  word: WordCollectionType;
-  quiz: QuizCollectionType | null;
-  flashcard: FlashcardCollectionType | null;
+  word: Database["public"]["Tables"]["word"]["Row"];
+  quiz: (Database["public"]["Tables"]["quiz"]["Row"] & {
+    questions: {
+      id: string;
+      text: string;
+      options: string[];
+      answer: string;
+      explanation: string;
+    }[];
+  }) | null;
+  flashcard: Database["public"]["Tables"]["flashcard"]["Row"] | null;
 };
 
 export async function getWholeArchive(
   id?: string,
 ): Promise<GetArchiveResponse> {
-  const wordId = id || getTodayId(); 
-  
-  try {
-    const wordDoc = await adminDb.collection("word").doc(wordId).get();
+  const supabase = await createClient();
+  let query = supabase
+    .from("word")
+    .select("*")
+    .order("createdAt", { ascending: false });
 
-    if (!wordDoc.exists) {
-      throw new Error("Word entry not found for this date");
+  if (id) {
+    query = query.eq("id", id);
+  }
+
+  try {
+    const { data: wordData, error: wordError } = await query.limit(1).single();
+
+    if (wordError || !wordData) {
+      throw new Error(
+        `Error fetching word: ${wordError?.message || "Not found"}`,
+      );
     }
 
-    const wordData = wordDoc.data() as WordCollectionType;
     const normalizedWord = wordData.word.toLowerCase().trim();
-
     const quizId = `${normalizedWord}_vocabulary`;
     const flashcardId = `${normalizedWord}_default`;
 
     const [quizSnap, flashcardSnap] = await Promise.all([
-      adminDb.collection("quiz").doc(quizId).get(),
-      adminDb.collection("flashcard").doc(flashcardId).get()
+      supabase
+        .from("quiz")
+        .select(
+          `
+          *,
+          quiz_question (
+            position,
+            question (
+              id,
+              text,
+              options,
+              answer,
+              explanation
+            )
+          )
+        `,
+        )
+        .eq("id", quizId)
+        .maybeSingle(),
+      supabase
+        .from("flashcard")
+        .select("*")
+        .eq("id", flashcardId)
+        .maybeSingle(),
     ]);
+
+    if (quizSnap.error) throw quizSnap.error;
+    if (flashcardSnap.error) throw flashcardSnap.error;
+
+    let formattedQuiz = null;
+    if (quizSnap.data) {
+      const sortedQuestions = (quizSnap.data.quiz_question || [])
+        .sort((a, b) => a.position - b.position)
+        .map((qq) => qq.question)
+        .filter(Boolean);
+
+      formattedQuiz = {
+        ...quizSnap.data,
+        questions: sortedQuestions,
+      };
+    }
 
     return {
       word: wordData,
-      quiz: quizSnap.exists ? (quizSnap.data() as QuizCollectionType) : null,
-      flashcard: flashcardSnap.exists ? (flashcardSnap.data() as FlashcardCollectionType) : null,
+      quiz: formattedQuiz,
+      flashcard: flashcardSnap.data,
     };
-
   } catch (err) {
     console.error("Error in getWholeArchive:", err);
     throw err;

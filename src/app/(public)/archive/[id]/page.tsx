@@ -18,7 +18,6 @@ export default async function WordPAge({
   const serializedQuiz = quiz
     ? {
         ...quiz,
-        updatedAt: quiz.updatedAt.toDate().toISOString(),
       }
     : null;
 

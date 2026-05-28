@@ -1,10 +1,11 @@
-import { adminDb } from "@/lib/firebase/admin";
+import { createClient } from "@/lib/supabase";
 import { getAIModel } from "@/util/getModel";
 import { generateText, Output } from "ai";
 import { NextRequest } from "next/server";
 import z from "zod";
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
   const model = getAIModel();
 
   const statement = request.nextUrl.searchParams.get("statement");
@@ -19,10 +20,24 @@ export async function GET(request: NextRequest) {
   }
 
   const flashcardId = statement.trim().toLowerCase().replace(/\s+/g, "-");
-  const flashcardRef = adminDb.collection("flashcard").doc(flashcardId);
+  const flashcardRef = supabase
+    .from("flashcard")
+    .select("*")
+    .eq("id", flashcardId);
 
   try {
-    const existingDoc = await flashcardRef.get();
+    const { data: existingDoc, error } = await flashcardRef;
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (existingDoc) {
+      return Response.json({
+        message: `Flashcard for "${statement}" already exists`,
+        data: existingDoc,
+      });
+    }
 
     const systemInstruction = "";
 

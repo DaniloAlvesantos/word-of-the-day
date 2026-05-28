@@ -1,8 +1,8 @@
-import { WordCollectionTypeDateString } from "@/types/firebase";
+import { Database } from "@/types/database";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 type Response = {
-  data: WordCollectionTypeDateString[];
+  data: Database["public"]["Tables"]["word"]["Row"][];
   nextCursor: string | null;
 };
 

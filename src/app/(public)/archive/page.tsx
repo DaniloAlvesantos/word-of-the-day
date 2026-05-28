@@ -41,7 +41,7 @@ export default function ArchivePage() {
                 </div>
               ))
             : sortedData.map((archive) => (
-                <div key={archive.dayId} className="break-inside-avoid">
+                <div key={archive.id} className="break-inside-avoid">
                   <ArchiveCard {...archive} />
                 </div>
               ))}
