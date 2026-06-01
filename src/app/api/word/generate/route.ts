@@ -1,13 +1,13 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase";
 
 const apiKey = process.env.NEXT_PRIVATE_GOOGLE_API_KEY;
 
 export async function GET() {
-  const supabase = await createClient();
-  
+  const supabase = await createAdminClient();
+
   if (!apiKey) {
     console.error("Missing NEXT_PRIVATE_GOOGLE_API_KEY environment variable.");
     return Response.json({ error: "Server misconfiguration" }, { status: 500 });
@@ -15,6 +15,7 @@ export async function GET() {
 
   const sdk = createGoogleGenerativeAI({
     apiKey,
+    baseURL: "https://generativelanguage.googleapis.com/v1",
   });
 
   try {
@@ -34,8 +35,8 @@ export async function GET() {
     const { output } = await generateText({
       model: sdk("gemini-2.5-flash"),
       temperature: 0.8,
-      maxRetries: 1, 
-      abortSignal: AbortSignal.timeout(6000),
+      maxRetries: 2,
+      abortSignal: AbortSignal.timeout(15000),
       output: Output.object({
         schema: z.object({
           word: z.string(),
@@ -98,11 +99,14 @@ export async function GET() {
     });
   } catch (error: any) {
     console.error("Error running generation route:", error);
-    
+
     if (error.name === "TimeoutError" || error.code === "ETIMEDOUT") {
       return Response.json(
-        { error: "Connection to Gemini API timed out. Try connecting via a VPN if local." }, 
-        { status: 504 }
+        {
+          error:
+            "Connection to Gemini API timed out. Try connecting via a VPN if local.",
+        },
+        { status: 504 },
       );
     }
 
