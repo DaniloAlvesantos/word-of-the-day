@@ -2,11 +2,11 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { NextRequest } from "next/server";
 import { getAIModel } from "@/util/getModel";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
   const model = getAIModel();
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const statement = request.nextUrl.searchParams.get("statement");
   const mode =

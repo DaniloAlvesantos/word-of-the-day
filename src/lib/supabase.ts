@@ -4,15 +4,15 @@ import { createClient as createClientSupabase } from "@supabase/supabase-js";
 import { Database } from "@/types/database";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; 
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export async function createClient() {
-  const cookieStore = await cookies();
-
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Missing public Supabase client environment variables.");
   }
+
+  const cookieStore = await cookies();
 
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -24,15 +24,19 @@ export async function createClient() {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options),
           );
-        } catch {}
+        } catch {
+          // Can fail silently if called from a pure static generation pass
+        }
       },
     },
   });
 }
 
-export async function createAdminClient() {
+export function createAdminClient() {
   if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error("Missing secure admin client environment variables (SUPABASE_SERVICE_ROLE_KEY).");
+    throw new Error(
+      "Missing secure admin client environment variables (SUPABASE_SERVICE_ROLE_KEY).",
+    );
   }
 
   return createClientSupabase<Database>(supabaseUrl, supabaseServiceKey, {

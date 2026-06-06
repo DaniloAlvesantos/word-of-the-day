@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase";
 const apiKey = process.env.NEXT_PRIVATE_GOOGLE_API_KEY;
 
 export async function GET() {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   if (!apiKey) {
     console.error("Missing NEXT_PRIVATE_GOOGLE_API_KEY environment variable.");
