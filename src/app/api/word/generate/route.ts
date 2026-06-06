@@ -15,7 +15,6 @@ export async function GET() {
 
   const sdk = createGoogleGenerativeAI({
     apiKey,
-    baseURL: "https://generativelanguage.googleapis.com/v1",
   });
 
   try {
