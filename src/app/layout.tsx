@@ -3,6 +3,8 @@ import { Lexend, Playfair_Display } from "next/font/google";
 import { SITE_TITLE, SITE_DESCRIPTION } from "@/lib/constants/SEO";
 import "./globals.css";
 import { ReactQueryProvider } from "@/contexts/query";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 const lexend = Lexend({
   variable: "--font-lexend",
@@ -30,7 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${lexend.variable} ${playfair.variable} antialiased`}>
+        <Header />
         <ReactQueryProvider>{children}</ReactQueryProvider>
+        <Footer />
       </body>
     </html>
   );

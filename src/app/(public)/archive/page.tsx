@@ -23,7 +23,6 @@ export default function ArchivePage() {
 
   return (
     <>
-      <Header />
       <section className="my-4 p-4">
         <h2 className="font-serif font-semibold text-4xl">Archive</h2>
         <p className="text-zinc-500">
@@ -62,7 +61,6 @@ export default function ArchivePage() {
           ) : null}
         </div>
       </main>
-      <Footer />
     </>
   );
 }

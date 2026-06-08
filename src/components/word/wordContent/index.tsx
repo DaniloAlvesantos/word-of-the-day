@@ -1,8 +1,8 @@
+import { BadgeLink } from "@/components/badges/badgeLink";
 import { PronounceButton } from "@/components/buttons/pronounceButton";
 import { SaveButton } from "@/components/buttons/saveButton";
 import { ShareButton } from "@/components/buttons/shareButton";
 import { Highlight } from "@/components/highlight";
-import { Badge } from "@/components/ui/badge";
 import { Database } from "@/types/database";
 
 interface WordContentProps {
@@ -78,9 +78,7 @@ export const WordContent = ({ word }: WordContentProps) => {
           <ul className="flex flex-wrap gap-2">
             {word.synonyms.map((d) => (
               <li key={crypto.randomUUID()}>
-                <Badge variant="outline" className="bg-white">
-                  {d}
-                </Badge>
+                <BadgeLink word={d} />
               </li>
             ))}
           </ul>

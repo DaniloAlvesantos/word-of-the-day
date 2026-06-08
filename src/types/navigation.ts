@@ -11,5 +11,13 @@ export const defaultNavigation: NavigationType = [
     {
         label: "Learn",
         href: "/learn"
-    }
+    },
+    {
+        label: "Synonyms",
+        href: "/synonyms"
+    },
+    {
+        label: "Dictionary",
+        href: "/dictionary"
+    },
 ]

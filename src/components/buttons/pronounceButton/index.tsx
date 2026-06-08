@@ -5,9 +5,13 @@ import { useState } from "react";
 
 interface PronounceButtonProps {
   word: string;
+  style?: "Circle" | "Regular";
 }
 
-export const PronounceButton = ({ word }: PronounceButtonProps) => {
+export const PronounceButton = ({
+  word,
+  style = "Circle",
+}: PronounceButtonProps) => {
   const [speechTime, setSpeechTime] = useState<number>(1);
 
   const handleSpeech = () => {
@@ -19,10 +23,14 @@ export const PronounceButton = ({ word }: PronounceButtonProps) => {
     <button
       type="button"
       aria-label="Play pronunciation"
-      className="bg-app-primary text-white p-2 shadow-md shadow-app-primary rounded-full hover:bg-app-primary/80 transition-colors duration-300 cursor-pointer"
+      className={`bg-app-primary text-white p-2 shadow-md shadow-app-primary hover:bg-app-primary/80 transition-colors duration-300 cursor-pointer rounded-full ${style === "Regular" && "text-xs px-3 py-1 h-auto"}`}
       onClick={handleSpeech}
     >
-      <Volume2 className="size-5 sm:size-6" aria-label="volume-icon" />
+      {style === "Circle" ? (
+        <Volume2 className="size-5 sm:size-6" aria-label="volume-icon" />
+      ) : (
+        "Pronounce by AI"
+      )}
     </button>
   );
 };

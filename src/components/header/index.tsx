@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { defaultNavigation, NavigationType } from "@/types/navigation";
 import { Button } from "../ui/button";
 
@@ -15,7 +15,7 @@ export const Header = ({ navigation = defaultNavigation }: HeaderProps) => {
         <Image src="/logo.png" alt="Logo" width={120} height={50} />
       </Link>
 
-      <nav className="flex items-center gap-4">
+      <nav className="items-center gap-4 hidden sm:flex">
         {navigation.map((nav) => (
           <Link
             href={nav.href}
@@ -27,11 +27,9 @@ export const Header = ({ navigation = defaultNavigation }: HeaderProps) => {
         ))}
       </nav>
 
-      <Link href="/search" className="w-30">
         <Button size="icon" variant="outline">
-          <Search tabIndex={0} />
+          <Menu tabIndex={0} className="size-5" />
         </Button>
-      </Link>
     </header>
   );
 };
