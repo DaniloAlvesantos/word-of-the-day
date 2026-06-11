@@ -1,3 +1,4 @@
+import { InternalError } from "@/errors/InternalError";
 import { createAdminClient } from "@/lib/supabase";
 
 export const revalidate = 86400;
@@ -13,7 +14,7 @@ export async function GET() {
       .limit(1);
 
     if (error) {
-      throw new Error(error.message);
+      throw new InternalError(error.message);
     }
 
     if (!wordRef || wordRef.length === 0) {

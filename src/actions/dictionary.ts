@@ -1,5 +1,6 @@
 "use server";
 
+import { ServiceError } from "@/errors/ServiceError";
 import { DictionaryEntry } from "@/types/dictionary";
 
 export async function getDictionaryWord(
@@ -19,7 +20,7 @@ export async function getDictionaryWord(
     }
 
     if (!response.ok) {
-      throw new Error(
+      throw new ServiceError(
         `Dictionary API responded with status: ${response.status}`,
       );
     }

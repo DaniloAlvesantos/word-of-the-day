@@ -1,3 +1,4 @@
+import { InternalError } from "@/errors/InternalError";
 import { createAdminClient } from "@/lib/supabase";
 import { NextRequest } from "next/server";
 
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const { data: words, error } = await query;
 
-    if (error) throw new Error(error.message);
+    if (error) throw new InternalError(error.message);
 
     if (!words || words.length === 0) {
       return Response.json({ data: [], nextCursor: null });
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
       data: words,
       nextCursor,
     });
-  } catch (err) {
+  } catch (err: InternalError | Error | unknown) {
     console.error("Fetch error inside archive cursor endpoint:", err);
     return Response.json(
       {

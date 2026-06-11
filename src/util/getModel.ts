@@ -6,7 +6,7 @@ const apiKey = process.env.NEXT_PRIVATE_GOOGLE_API_KEY;
 export const getAIModel = () => {
   const isDev = process.env.NODE_ENV === "development";
   const sdk = isDev ? createOllama() : createGoogleGenerativeAI({ apiKey });
-  const model = isDev ? sdk("") : sdk("gemini-2.5-flash");
+  const model = isDev ? sdk("qwen3:8b") : sdk("gemini-2.5-flash");
 
   return model;
 };

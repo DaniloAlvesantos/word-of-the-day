@@ -3,6 +3,7 @@ import { z } from "zod";
 import { NextRequest } from "next/server";
 import { getAIModel } from "@/util/getModel";
 import { createAdminClient } from "@/lib/supabase";
+import { InternalError } from "@/errors/InternalError";
 
 export async function GET(request: NextRequest) {
   const model = getAIModel();
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (fetchError) {
-      throw new Error(fetchError.message);
+      throw new InternalError(fetchError.message);
     }
 
     if (existingQuiz) {
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
       prompt: `Generate a comprehensive ${mode} quiz for the topic: "${statement.toUpperCase()}"`,
     });
 
-    if (!output?.data) throw new Error("AI returned empty output");
+    if (!output?.data) throw new InternalError("AI returned empty output");
 
     const { error: quizInsertError } = await supabase.from("quiz").insert({
       id: quizId,
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
         questions: output.data,
       },
     });
-  } catch (error: unknown) {
+  } catch (error: InternalError | Error | unknown) {
     if (
       error &&
       typeof error === "object" &&
@@ -141,6 +142,9 @@ export async function GET(request: NextRequest) {
     }
 
     console.error("AI Generation Error:", error);
-    return Response.json({ error: "Operation failed" }, { status: 500 });
+    return Response.json(
+      { error: "Operation failed", message: (error as Error).message || "" },
+      { status: 500 },
+    );
   }
 }

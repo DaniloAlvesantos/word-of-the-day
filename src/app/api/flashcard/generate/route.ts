@@ -1,3 +1,4 @@
+import { InternalError } from "@/errors/InternalError";
 import { createClient } from "@/lib/supabase";
 import { getAIModel } from "@/util/getModel";
 import { generateText, Output } from "ai";
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     const { data: existingDoc, error } = await flashcardRef;
 
     if (error) {
-      throw new Error(error.message);
+      throw new InternalError(error.message);
     }
 
     if (existingDoc) {

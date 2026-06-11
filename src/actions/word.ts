@@ -1,4 +1,5 @@
 "use server";
+import { ServiceError } from "@/errors/ServiceError";
 import { createClient } from "@/lib/supabase";
 import { Database } from "@/types/database";
 
@@ -16,7 +17,7 @@ export async function getTodayWord(): Promise<
     const { data: todayRef, error } = await query.single();
 
     if (error) {
-      throw new Error(`Error fetching today's word: ${error.message}`);
+      throw new ServiceError(`Error fetching today's word: ${error.message}`);
     }
 
     if (todayRef) {
@@ -44,7 +45,7 @@ export async function getWordById(
     const { data: word, error } = await wordRef.single();
 
     if (error) {
-      throw new Error(`Error fetching word: ${error.message}`);
+      throw new ServiceError(`Error fetching word: ${error.message}`);
     }
 
     if (word) {
@@ -85,7 +86,7 @@ export async function getWholeArchive(
     const { data: wordData, error: wordError } = await query.limit(1).single();
 
     if (wordError || !wordData) {
-      throw new Error(
+      throw new ServiceError(
         `Error fetching word: ${wordError?.message || "Not found"}`,
       );
     }

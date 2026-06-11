@@ -2,6 +2,8 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase";
+import { InternalError } from "@/errors/InternalError";
+import { PostgrestError } from "@supabase/supabase-js";
 
 const apiKey = process.env.NEXT_PRIVATE_GOOGLE_API_KEY;
 
@@ -26,7 +28,7 @@ export async function GET() {
 
     if (error || !recentWords) {
       console.error("Supabase Error:", error);
-      throw new Error("Error fetching recent words");
+      throw new InternalError("Error fetching recent words");
     }
 
     const usedWords = recentWords.flatMap((word) => word.word).join(", ");
@@ -70,7 +72,7 @@ export async function GET() {
       prompt: `Generate a unique, uncommon mindset word that is highly useful for English learners to master English. Do not use basic words like 'Resilience' or 'Grit'.`,
     });
 
-    if (!output) throw new Error("AI returned empty output");
+    if (!output) throw new InternalError("AI returned empty output");
 
     const newWordData = {
       ...output,
@@ -96,10 +98,13 @@ export async function GET() {
       id: newWordData.id,
       data: newWordData,
     });
-  } catch (error: any) {
+  } catch (error: InternalError | PostgrestError | unknown) {
     console.error("Error running generation route:", error);
 
-    if (error.name === "TimeoutError" || error.code === "ETIMEDOUT") {
+    if (
+      (error instanceof PostgrestError && error.name === "TimeoutError") ||
+      (error as PostgrestError).code === "ETIMEDOUT"
+    ) {
       return Response.json(
         {
           error:
@@ -109,6 +114,9 @@ export async function GET() {
       );
     }
 
-    return Response.json({ error: "Operation failed" }, { status: 500 });
+    return Response.json(
+      { error: "Operation failed", message: error },
+      { status: 500 },
+    );
   }
 }

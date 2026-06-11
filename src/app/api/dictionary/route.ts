@@ -1,3 +1,4 @@
+import { InternalError } from "@/errors/InternalError";
 import { DictionaryResponse } from "@/types/dictionary";
 import { NextRequest } from "next/server";
 
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!response.ok) {
-      throw new Error(
+      throw new InternalError(
         `Dictionary API responded with status: ${response.status}`,
       );
     }
@@ -33,11 +34,11 @@ export async function GET(request: NextRequest) {
     const data = (await response.json()) as DictionaryResponse[];
 
     if (!data || data.length === 0) {
-      throw new Error("Parsed response contains empty array payload data.");
+      throw new InternalError("Parsed response contains empty array payload data.");
     }
 
     return Response.json(data, { status: 200 });
-  } catch (err) {
+  } catch (err: InternalError | Error | unknown) {
     console.error("Error in dictionary route utility handler:", err);
 
     return Response.json(

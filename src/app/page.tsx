@@ -1,6 +1,4 @@
 import { getTodayWord } from "@/actions/word";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
 import { WordContent } from "@/components/word/wordContent";
 import { Database } from "@/types/database";
 
